@@ -1,0 +1,555 @@
+---
+title: "WellClear_Sorting"
+author: "Rebecca Garcia"
+date: "3/18/2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=TRUE, echo=TRUE, message=FALSE}
+# fig.width=6.5 good for knitting; 3.5 good for viewing
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, fig.asp=0.65, fig.width=7.5, comment = "")
+# Required Libraries & Packages
+require(tidyverse)
+require(plyr)
+library(dplyr)
+library(dbplyr)
+library(modelr)
+library(splines)
+options(na.action = na.warn)
+# Change default printing
+options(tibble.print_max=5, tibble.print_min=5, tibble.width=Inf)
+# Setting Working Directory
+# setwd("D:Encounters")
+```
+
+# Data Import
+
+```{r message=FALSE, warning=FALSE}
+  EM_Summary <- select(read_csv("terminal_encounter_info_20200630.csv"),-X20)
+```
+
+# Grouping by Takeoff/Landing
+
+```{r}
+# Landing 
+LD_WC <- filter(EM_Summary, int_intent == 1)
+LD_Violate <- filter(LD_WC, hmd_ft <= 2000 & 
+                       vmd_ft <= 200 & vmd_ft >= -200)
+LD_WC <- anti_join(LD_WC, LD_Violate, by = "id")
+
+# Takeoff
+TO_WC <- filter(EM_Summary,int_intent == 2)
+TO_Violate <- filter(TO_WC, hmd_ft <= 2000 &
+                      vmd_ft <= 200 & vmd_ft >= -200)
+TO_WC <- anti_join(TO_WC,TO_Violate, by = "id")
+ 
+```
+
+# Showing Horizontal Distributions
+
+```{r}
+# Landing Well Clear Distribution
+LD_WC %>%
+  ggplot(aes(hmd_ft)) +
+  geom_histogram(binwidth = 1000) +
+  labs(title = "Landing Well Clear") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Count")
+
+# Takeoff Well Clear Distribution
+TO_WC %>%
+  ggplot(aes(hmd_ft)) +
+  geom_histogram(binwidth = 1000) +
+  labs(title = "Takeoff Well Clear") + 
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Count")
+ 
+# Landing WC Violation Distribution
+LD_Violate %>%
+  ggplot(aes(hmd_ft)) +
+  geom_histogram(binwidth = 50) +
+  labs(title = "Landing Well Clear Violation") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Count")
+
+# Takeoff WC Violate Distribution
+TO_Violate %>%
+  ggplot(aes(hmd_ft)) +
+  geom_histogram(binwidth = 50) +
+  labs(title = "Takeoff Well Clear Violation") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Count")
+```
+
+# Showing Vertical Distributions
+
+```{r}
+LD_WC %>%
+  ggplot(aes(vmd_ft)) +
+  geom_histogram(binwidth = 100) +
+  coord_cartesian(xlim = c(-2000,2500)) +
+  scale_x_continuous(breaks = seq(-2000,2500,500)) +
+  labs(title = "Landing Well Clear") +
+  xlab("Minimum Vertical Seperation") +
+  ylab("Count")
+
+# Takeoff Well Clear Distribution
+TO_WC %>%
+  ggplot(aes(vmd_ft)) +
+  geom_histogram(binwidth = 100) +
+  coord_cartesian(xlim = c(-2000,2500)) +
+  scale_x_continuous(breaks = seq(-2000,2500,500)) +
+  labs(title = "Takeoff Well Clear") +
+  xlab("Minimum Vertical Seperation") +
+  ylab("Count")
+
+ 
+# Landing WC Violation Distribution
+LD_Violate %>%
+  ggplot(aes(vmd_ft)) +
+  geom_histogram(binwidth = 25) +
+  scale_x_continuous(breaks = seq(-200,200,25)) +
+  labs(title = "Landing Well Clear Violation") +
+  xlab("Minimum Vertical Seperation") +
+  ylab("Count")
+ 
+
+# Takeoff WC Violate Distribution
+TO_Violate %>%
+  ggplot(aes(vmd_ft)) +
+  geom_histogram(binwidth = 25) +
+  scale_x_continuous(breaks = seq(-200,200,25)) +
+  labs(title = "Takeoff Well Clear Violation") +
+  xlab("Minimum Vertical Seperation") +
+  ylab("Count")
+  
+```
+
+# Well Clear Vertical & Horizontal Density Distribution
+
+```{r}
+# Landing WC Distribution
+bind_rows(LD_WC, LD_Violate) %>%
+  ggplot(aes(hmd_ft, vmd_ft)) +
+  geom_density2d_filled(show.legend = FALSE) +
+    coord_cartesian(xlim = c(0,15000), ylim = c(-500,1500)) +
+  scale_x_continuous(breaks = seq(0,15000, 1000)) +
+  scale_y_continuous(breaks = seq(-500,1500, 250)) +
+  labs(title = "Landing Encounters") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Minimum Vertical Seperation")
+
+# Takeoff WC Distribution
+bind_rows(TO_WC, TO_Violate) %>%
+  ggplot(aes(hmd_ft, vmd_ft)) +
+  geom_density2d_filled(show.legend = FALSE) +
+    coord_cartesian(xlim = c(0,15000), ylim = c(-500,1500)) +
+  scale_x_continuous(breaks = seq(0,15000, 1000)) +
+  scale_y_continuous(breaks = seq(-500,1500, 250)) +
+  labs(title = "Takeoff Encounters") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Minimum Vertical Seperation")
+```
+
+# Violated Verticle & Horizontal Density Distribution
+
+```{r}
+# Landing WC Violation Distribution
+LD_Violate %>%
+  ggplot(aes(hmd_ft, vmd_ft)) +
+  geom_density2d_filled(show.legend = FALSE, bins = 25) +
+  scale_x_continuous(breaks = seq(0,2000, 200)) +
+  scale_y_continuous(breaks = seq(-200,200, 50)) +
+  labs(title = "Landing Well Clear Violation") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Minimum Vertical Seperation") 
+
+# Takeoff WC Violate Distribution
+TO_Violate %>%
+  ggplot(aes(hmd_ft, vmd_ft)) +
+  geom_density2d_filled(show.legend = FALSE, bins = 25) +
+  scale_x_continuous(breaks = seq(0,2000, 200)) +
+  scale_y_continuous(breaks = seq(-200,200, 50)) +
+  labs(title = "Takeoff Well Clear Violation") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Minimum Vertical Seperation") 
+```
+
+## Determining Collision Rates from WC Violations
+MIT LL ecided collision happens at: 
+-100' <= `vmd_ft` <= 100', `hmd_ft` <= 500'
+
+```{r}
+LD_Collision <- filter(LD_Violate, hmd_ft <= 500 & 
+                         vmd_ft <= 100 & vmd_ft >= -100)
+TO_Collision <- filter(TO_Violate, hmd_ft <= 500 & 
+                         vmd_ft <= 100 & vmd_ft >= -100)
+
+LD_Collision %>%
+  ggplot(aes(hmd_ft,vmd_ft)) +
+  geom_density2d_filled(show.legend = FALSE) +
+  labs(title = "Landing Collision Distribution") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Minimum Vertical Seperation") 
+
+TO_Collision %>%
+  ggplot(aes(hmd_ft,vmd_ft)) + 
+  geom_density2d_filled(show.legend = FALSE) +
+  labs(title = "Takeoff Collision Distribution") +
+  xlab("Minimum Horizontal Seperation") +
+  ylab("Minimum Vertical Seperation") 
+
+
+```
+
+
+## Investigating Collision Time Stamps (TCPA)
+
+```{r}
+LD_Collision %>%
+  ggplot(aes(tcpa)) +
+  geom_histogram(binwidth = 2) +
+  labs(title = "Landing Collision TCPA Distribution") +
+  xlab("Time (seconds) at Closest Point of Approach") +
+  ylab("Count")
+
+TO_Collision %>%
+  ggplot(aes(tcpa)) +
+  geom_histogram(binwidth = 2) +
+  labs(title = "Take Off Collision TCPA Distribution") +
+  xlab("Time (seconds) at Closest Point of Approach") +
+  ylab("Count")
+
+```
+
+## Investigating WC Violation Time Stamps
+
+
+```{r}
+LD_Violate %>%
+  ggplot(aes(tcpa)) +
+  geom_histogram(binwidth = 3) +
+  scale_x_continuous(breaks = seq(0,130,10)) +
+  labs(title = "Landing Well Clear Violation TCPA") +
+  xlab("Time (seconds) at Closest Point of Approach") +
+  ylab("Count")
+
+TO_Violate %>%
+  ggplot(aes(tcpa)) +
+  geom_histogram(binwidth = 3) +
+  scale_x_continuous(breaks = seq(0,130,10)) +
+  labs(title = "Take Off Well Clear Violation  TCPA") +
+  xlab("Time (seconds) at Closest Point of Approach") +
+  ylab("Count")
+
+```
+## Well Clear Time Stamps
+
+```{r}
+
+LD_WC %>%
+  ggplot(aes(tcpa)) +
+  geom_histogram(binwidth = 2) +
+  labs(title = "Landing Well Clear TCPA") +
+  xlab("Time (seconds) at Closest Point of Approach") +
+  ylab("Count")
+
+TO_WC %>%
+  ggplot(aes(tcpa)) +
+  geom_histogram(binwidth = 2) +
+  labs(title = "Take Off Well Clear TCPA") +
+  xlab("Time (seconds) at Closest Point of Approach") +
+  ylab("Count")
+
+```
+
+
+
+
+# Looking at Encounters with tcpa <= 10 s
+
+```{r}
+QuickTime_Violate <- bind_rows(filter(LD_Violate, tcpa <= 10), filter(TO_Violate, tcpa <= 10))
+
+QuickTime_LD <- filter(LD_WC, tcpa <= 10)
+QuickTime_TO <- filter(TO_WC, tcpa <= 10)
+
+QuickTime_Violate %>%
+  ggplot(aes(hmd_ft,vmd_ft)) + 
+  geom_density2d_filled(show.legend = FALSE) +
+  labs(title = "Violated WC QuickTime Distribution") +
+  xlab("Horizontal Seperation") +
+  ylab("Vertical Seperation")
+
+QuickTime_LD %>%
+  ggplot(aes(hmd_ft,vmd_ft)) + 
+  geom_density2d_filled(show.legend = FALSE) +
+  coord_cartesian(xlim = c(0,20000), ylim = c(-1000,1000)) +
+#  scale_x_continuous(breaks = seq(0,15000, 1000)) +
+#  scale_y_continuous(breaks = seq(-500,1500, 250)) +
+  labs(title = "Landing QuickTime Distribution") +
+  xlab("Horizontal Seperation") +
+  ylab("Vertical Seperation")
+
+QuickTime_TO %>%
+  ggplot(aes(hmd_ft,vmd_ft)) + 
+  geom_density2d_filled(show.legend = FALSE) +
+  coord_cartesian(xlim = c(5000,15000), ylim = c(-500,500)) +
+#  scale_x_continuous(breaks = seq(0,15000, 1000)) +
+#  scale_y_continuous(breaks = seq(-500,1500, 250)) +
+  labs(title = "Take Off QuickTime Distribution") +
+  xlab("Horizontal Seperation") +
+  ylab("Vertical Seperation")
+```
+In all three cases, tcpa <= 10, Vertical Separation was near 0.
+
+For the QT cases, how close are they to the airport terminal?
+
+# Investigating distances from terminal origin
+Units are in nautical miles. Distance from runway at CPA.
+
+## Landing
+### Applying Encounter Characteristic IDs for later export
+```{r}
+LD_Violate <- LD_Violate %>%
+  mutate(Encounter = "Violate") %>%
+  relocate(Encounter, .after = id)
+
+LD_WC <- LD_WC %>%
+  mutate(Encounter = "Clear") %>%
+  relocate(Encounter, .after = id)
+
+bind_rows(filter(LD_WC, hmd_ft < 10000), LD_Violate) %>%
+  ggplot(aes(own_distance, int_distance, colour = Encounter)) +
+  geom_point(alpha = .01) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  labs(title = "Landing Encounters Range from Terminal") +
+  xlab("Ownship Distance from Terminal (nautical miles)") +
+  ylab("Intruder Distance from Terminal (nautical miles)")
+
+# I ran the above code twice, once without a filter, and once with.
+```
+
+## Take Off
+### Applying Encounter Characteristic IDs for later export
+```{r}
+TO_Violate <- TO_Violate %>%
+  mutate(Encounter = "Violate") %>%
+  relocate(Encounter, .after = id)
+
+TO_WC <- TO_WC %>%
+  mutate(Encounter = "Clear") %>%
+  relocate(Encounter, .after = id)
+
+bind_rows(filter(TO_WC, hmd_ft < 10000), LD_Violate) %>%
+  ggplot(aes(own_distance, int_distance, colour = Encounter)) +
+  geom_point(alpha = .01) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  labs(title = "Take Off Encounters Range from Terminal") +
+  xlab("Ownship Distance from Terminal (nautical miles)") +
+  ylab("Intruder Distance from Terminal (nautical miles)")
+# I ran the above code twice, once without a filter, and once with.
+```
+
+
+# Investigating Speed Distributions
+Speed at CPA in feet per second
+
+Max was 250 kt = ~420 ft/s
+
+## Ownship
+```{r}
+# Landing
+
+bind_rows(LD_WC, LD_Violate) %>%
+  ggplot(aes(own_speed, fill = Encounter)) + 
+  geom_density(alpha = .3) +
+  
+  geom_vline(aes(xintercept = mean(own_speed), colour = Encounter),
+             linetype = "longdash", size=1) +
+  
+  labs(title = "OwnShip Speed While Intruder Lands") +
+  xlab("OwnShip Speed (ft/s)") +
+  ylab("Density")
+```
+
+
+```{r}
+# Take Off
+
+bind_rows(TO_WC, TO_Violate) %>%
+  ggplot(aes(own_speed, fill = Encounter)) + 
+  geom_density(alpha = .3) + 
+  
+  geom_vline(aes(xintercept = mean(own_speed), colour = Encounter),
+             linetype = "longdash", size=1) +
+  
+  geom_text(aes(x = mean(own_speed), y = 0, label = "Average"), 
+            size = 4, angle = 90, vjust=0.4, hjust=0) +
+  
+  labs(title = "OwnShip Speed While Intruder Takes Off") +
+  xlab("OwnShip Speed (ft/s)") +
+  ylab("Density")
+
+
+```
+
+
+## Intruder
+```{r}
+# Landing
+
+bind_rows(LD_WC, LD_Violate) %>%
+  ggplot(aes(own_speed, fill = Encounter)) + 
+  geom_density(alpha = .3) +
+  
+  geom_vline(aes(xintercept = mean(own_speed), colour = Encounter),
+             linetype = "longdash", size=1) +
+  
+  labs(title = "Intruder Speed During Landing") +
+  xlab("Intruder Speed (ft/s)") +
+  ylab("Density")
+
+# Take Off
+
+bind_rows(TO_WC, TO_Violate) %>%
+  ggplot(aes(own_speed, fill = Encounter)) + 
+  geom_density(alpha = .3) +
+  
+  geom_vline(aes(xintercept = mean(own_speed), colour = Encounter),
+             linetype = "longdash", size=1) +
+  
+  labs(title = "Intruder Speed During Take Off") +
+  xlab("Intruder Speed (ft/s)") +
+  ylab("Density")
+```
+## Speed at CPA Conclusion
+Both crafts are pretty average.
+
+Ownship
+~100 ft/s = ~60 knots = 68 mph
+
+Intruder
+~200 ft/s is equivalent to 118.5 knots OR 136 mph
+
+FOR CONTEXT: 
+Jetliners range from 149 to 177 mph @ Max Take Off Speed
+Commercial AC Land around 150 to 165 mph
+General Aviation (Light Aircraft such as a Cessna 150) ~62 mph
+Ultralight AC require even less speed.
+
+Conclusion: Ownship is an unmanned aircaft about the size/weight of a Cessna 150
+Cessna150 ~985 lb => Group 3 unmanned aircraft (Size classification: Large)
+Group 3 is < 1320 lb @ MGTW
+
+Intruder is most likely general aviation or small commercial AC. Unlikely to be
+a Boeing 747.
+
+
+# Investigating Aircraft Bearing relative to Runway at CPA (in degrees)
+
+## Ownship
+Ownship is an unmanned AC on a Straight-In approach to Airfield
+```{r}
+# Well Clear  
+
+LD_WC %>%
+  ggplot(aes(own_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Landing Well Clear OwnShip Bearing")
+
+TO_WC %>%
+  ggplot(aes(own_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Take Off Well Clear OwnShip Bearing")
+
+# Violations
+
+LD_Violate %>%
+  ggplot(aes(own_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Landing Violation OwnShip Bearing")
+
+TO_Violate %>%
+  ggplot(aes(own_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Take Off Violation OwnShip Bearing")
+```
+
+
+
+
+## Intruder
+Intruder aircraft is either landing or taking off, but not transitioning
+Intruder can be manned OR unmanned... 
+```{r}
+# Well Clear  
+
+LD_WC %>%
+  ggplot(aes(int_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Landing Well Clear Intruder Bearing")
+
+TO_WC %>%
+  ggplot(aes(int_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Take Off Well Clear Intruder Bearing")
+
+# Violations
+
+LD_Violate %>%
+  ggplot(aes(int_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Landing Violation Intruder Bearing")
+
+TO_Violate %>%
+  ggplot(aes(int_bearing)) + 
+  geom_freqpoly(binwidth = 25) + 
+  labs(title = "Take Off Violation Intruder Bearing")
+```
+
+## Bearing Conclusion
+Ownship is coming in from the same bearing/angle/location every time.
+Intruder has some variability, but will only violate if intruder bearing matches 
+that of ownship.
+
+# Exporting IDs for Each Grouping
+
+```{r}
+# Export of Landing: Well Clear, Violation, and Collision Ids 
+export_LD_WC <- select(LD_WC,"id")
+  write.csv(export_LD_WC, "LD_WC_ID")
+  
+export_LD_Violate <- select(LD_Violate,"id")
+  write.csv(export_LD_Violate, "LD_Violate_ID")
+
+export_LD_Collision <- select(LD_Collision,"id")
+  write.csv(export_LD_Collision, "LD_Collision_ID")  
+  
+# Export of Take Off: Well Clear, Violation, and Collision Ids   
+export_TO_WC <- select(TO_WC,"id")
+  write.csv(export_TO_WC, "TO_WC_ID")
+  
+export_TO_Violate <- select(TO_Violate,"id")
+  write.csv(export_TO_Violate, "TO_Violate_ID")
+  
+export_TO_Collision <- select(TO_Collision,"id")
+  write.csv(export_TO_Collision, "TO_Collision_ID")   
+
+# Export of Quick Time Ids  
+export_QuickTime_Violation <- select(QuickTime_Violate,"id")
+  write.csv(export_QuickTime_Violation, "QuickTime_Violation_ID")
+
+export_QuickTime_LD <- select(QuickTime_LD,"id")
+  write.csv(export_QuickTime_LD, "QuickTime_LD_ID")  
+    
+export_QuickTime_TO <- select(QuickTime_TO,"id")
+  write.csv(export_QuickTime_TO, "QuickTime_TO_ID")
+  
+```
+
+
+
+
