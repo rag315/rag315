@@ -14,7 +14,8 @@ MIT LL Terminal Encounter Model Data Analysis
 
 - For a final class project, this RMD File analyzes the LLTEM Data set.
 
-
+UFOs 2
+- A personal project intended to familiarize myself with python packages matplotlib, pandas, and geopandas. 'main.py' analyzes a 2016 dataset from the National UFO Reporting Center of US/Canada. This dataset can be found at https://data.world/aarranzlopez/ufo-sights-2016-us-and-canada . 
 <!---
 rag315/rag315 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 You can click the Preview link to take a look at your changes.
