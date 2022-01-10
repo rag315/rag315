@@ -1,0 +1,3 @@
+This directory contains a python script to analyze a 2016 dataset from the National UFO Reporting Center US/Canada. 
+This dataset can be found at https://data.world/aarranzlopez/ufo-sights-2016-us-and-canada . 
+This script was created to familarize myself with the packages matplotlib, pandas, and geopandas.
