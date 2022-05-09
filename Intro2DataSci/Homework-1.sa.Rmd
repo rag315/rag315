@@ -1,0 +1,221 @@
+---
+title: "Homework-1_rag315"
+output:
+  word_document: default
+  html_document:
+    highlight: pygments
+    theme: readable
+  pdf_document: default
+---
+# Homework 1
+## By Rebecca A. Garcia, rag315
+### 5th of February, 2021
+<!--
+    toc: true
+    toc_depth: 3
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, fig.asp=0.65, fig.width=3.5)
+require(tidyverse)
+```
+
+All of these homework problems are from the *R for Data Science* book.  The section numbers (e.g., "3.2.4 Exercises") refer to sections in this book.
+```{r}
+library(tidyverse)
+mpg
+```
+### 3.2.4 Exercises
+
+#### (1) 3.2.4 Exercise 4 (10 pts)
+
+For the `mpg` dataset, make a scatterplot of `hwy` vs `cyl`.  What does this plot tell you about these two variables?
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cyl, y = hwy))
+```
+As the number of cylinders increases, the highway mpg decreases.
+
+#### (2) 3.2.4 Exercise 5 (10 pts) 
+
+What happens if you make a scatterplot of `class` vs. `drv`.  Is this plot useful?  Why or why not?
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = class, y = drv))
+```
+This plot is not useful because you cannot see the class names, and both of the variables used are categorical. No useful information can be obtained from this graph.
+
+### 3.3.1 Exercises
+
+#### (3) 3.3.1 Exercise 2 (10 pts) 
+
+Which variables in `mpg` are categorical?  Which are continuous?  (Hint: type `?mpg` to read the documentation for the dataset).  How can you see this information when you run `mpg`?
+
+The categorical variables are:
+* manufacturer
+* model
+* trans
+* drv
+* fl
+* class
+
+The continuous variables are:
+* displ
+* year
+* cyl
+* cty
+* hwy
+
+In the pop-out view of 'mpg' dataset, the variable types are listed below the name. <chr> represents categorical variables, while <dbl> and int are continuous.
+
+#### (4) 3.3.1 Exercise 3 (10 pts) 
+
+Consider the scatterplot of displacement vs miles per gallon that we have been studying:
+
+```{r, echo=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+
+Map a continuous variable to `color`, `size`, and `shape`, and show the resulting graphs.  How do these aesthetics behave differently for categorical vs. continuous variables?
+
+```{r, echo=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ, size = cty ))
+```
+
+Both size and color can be displayed as a gradient change. However, shape cannot
+be displayed as a gradient, and thus an error appears when attempting to graph a
+continous variable to this graph property.
+
+
+#### (5) 3.3.1 Exercise 6 (10 pts)
+
+What happens if you map an aesthetic to something other than a variable name, like `aes(color = displ < 4)`?
+
+```{r, echo=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ < 4))
+```
+
+If the displ variable fulfills the argument, it is colored true and colored false if not.
+
+### 3.5.1 Exercises
+
+#### (6) 3.5.1 Exercise 1 (5 pts)
+
+What happens if you facet on a continuous variable?  Show an example.
+
+```{r, echo=FALSE}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
+  facet_wrap(vars(hwy))
+```
+
+When setting a facetwrap to a continuous variable, the image breaks into multiple facets to try and fill the continuous variable, but if there is too many different data points, just the top and bottom data point is shown.
+
+
+#### (7) 3.5.1 Exercise 4 (10 pts)
+
+Consider the first faceted plot in this section:
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(facets = vars(class), nrow = 2)
+```
+
+Create a comparable graph that uses the color aesthetic.  What are the advantages to using faceting instead of the color aesthetic?  What are the disadvantages?  How might the balance change if you had a larger dataset? 
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+
+Faceting can be useful in cases where you have smaller categorical variables in that Faceting can serve as an easy way to compare the categories on separate graphs. However, if there are too many categories, then it would be better to use the color aesthetic and keep of the data on a single graph.
+
+### 3.6.1 Exercises
+
+#### (8) 3.6.1 Exercises 2 (10 pts)
+
+Run this code in your head and predict what the output will look like. Then, run the code in R and check your predictions, and discuss the result:
+
+I predict that the line starting with 'ggplot' and ending in '+' plots a basic scatter plot of displ vs hwy. Each point on this plot will be colored according to the car's drive train type.'geom_point' will keep the graph as a scatter plot, and 'geom_smooth' creates a trendline for each drive train type. 'se'is the confidence interval, so setting 'se' to be FALSE hides the confidence interval from the chart.
+```{r, message=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+
+I read through the help section on 'ggplot', 'geom_point', and 'geom_smooth' before answering the first question. Running the code shows that my answer is correct. 
+
+#### (9) 3.6.1 Exercises 4 (5 pts)
+
+What does the `se` argument to `geom_smooth()` do?
+
+'se' stands for standard error and displays the confidence interval around the smoothed trendline.
+
+#### (10) 3.6.1 Exercises 5 (5 pts)
+
+Will these two graphs look different?  Why or why not?
+
+These graphs will look the same. Putting the parameters into the 'ggplot' function is kind of like setting a global parameter for the graph. If you do not put the parameters into 'ggplot', then you must specify them in each subsequent graphing command.
+
+
+```{r, message=FALSE, eval=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+```
+
+
+#### 3.6.1 Exercises 6 
+
+Recreate the R code needed to generate each of these graphs:
+
+##### (11) (6.1, 5 pts)
+```{r, message=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 2) + 
+  geom_smooth(size = 1.5,se=FALSE)
+```
+##### (12) (6.2, 5 pts)
+```{r, message=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 2) + 
+  geom_smooth(mapping = aes(group=drv),size = 1.5,se=FALSE)
+```
+##### (13) (6.3, 5 pts)
+
+```{r, message=FALSE}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy,color=drv)) + 
+  geom_point(size = 2) + 
+  geom_smooth(size = 1.5,se=FALSE)
+```
+
+
+##### (14) (6.4, 5 pts)
+```{r,message=FALSE}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = drv)) +
+  geom_smooth(size=1.5,se = FALSE)
+```
+##### (15) (6.5, 5 pts)
+
+```{r,message=FALSE}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = drv)) +
+  geom_smooth(aes(linetype = drv), se = FALSE)
+```
+
+##### (16) (6.6, 5 pts)
+
+```{r,message=FALSE}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(size=4,color="white") +
+  geom_point(aes(color = drv))
+```

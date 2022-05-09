@@ -1,0 +1,111 @@
+---
+title: "Homework-4"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: readable
+    toc: yes
+  word_document: default
+---
+
+<!--
+    toc: true
+    toc_depth: 3
+-->
+
+```{r setup, include=FALSE}
+# fig.width=4.5 good for general work; fig.width=3.5 better for PDF / Word
+knitr::opts_chunk$set(echo=TRUE, cache=TRUE, fig.asp=0.65, fig.width=5.5)
+require(tidyverse)
+library(modelr)
+library(dplyr)
+options(na.action = na.warn)
+```
+
+All of these homework problems are from the *R for Data Science* book.  The section numbers (e.g., "3.2.4 Exercises") refer to sections in this book.  Although the questions are based on those in the book, some questions ask for additional details or analysis.
+
+When solving these problems, you are allowed to use any method from the book or class, even if that method wasn't yet covered when the exercise was presented in the book. 
+
+Write answers that are as complete as possible.  If a graph is helpful for formalizing the solution, provide the graph.  If a table is helpful, provide a table.  In the text part of the answer, outline the progression in your thinking as you perform the analysis.  
+
+***
+## 23.2.1 Exercises
+
+### (1) 23.2.1 Exercise 1
+
+One downside of the linear model is that it is sensitive to unusual values because the distance incorporates a squared term. Fit a linear model to the simulated data below, and visualize the results. Rerun everything 6 times to generate different simulated datasets, and also examine the slope and intercept of the generated models, as well as the $R^2$ values.  How much variability do you see?  How do the data values affect the model?
+
+```{r}
+sim1a <- tibble(
+  x = rep(1:10, each = 3),
+  y = x * 1.5 + 6 + rt(length(x), df = 2)
+)
+```
+
+*Hint*: To make it easy to do this 6 times, it makes sense to wrap everything into a function, and call that from within a `for` loop.  The following code will help you accomplish this: 
+
+```{r}
+p <- ggplot(sim1, aes(x, y)) + 
+  geom_point()
+print(p)
+print(sprintf("Your value: %0.2f", 0.82354))
+```
+
+
+
+***
+### (2) 23.2.1 Exercise 2
+
+One way to make linear models more robust is to use a different distance measure. For example, instead of root-mean-squared (RMS) distance, you could use mean-absolute-deviation (MAD) distance:
+
+```{r}
+measure_distance <- function(a, data) {
+  diff <- data$y - make_prediction(a, data)
+  mean(abs(diff))
+}
+```
+
+Use `optim()` to fit this model to the simulated data above and visually compare it to the linear model, again examining at least 6 instances.  You want both models to be drawn on top of each instance of the simulated data set.  Discuss what you find.
+
+*Hints*: `make_prediction()` is not a built-in function; you will need to create your own linear function.  Unlike Exercise 1, here you should only compare the models graphically; I don't think the $R^2$ metric is meaningful for a model that uses the MAD distance measure.
+
+
+***
+## 23.3.3 Exercises
+
+### (3) 23.3.3 Exercise 1
+
+Instead of using `lm()` to fit a straight line, you can use `loess()` to fit a smooth curve. Repeat the process of model fitting, grid generation, predictions, and visualization on `sim1` using `loess()` instead of `lm()`. How does the result compare to `geom_smooth()`?
+
+
+### (4) 23.3.3 Exercise 2
+
+`add_predictions()` is paired with `gather_predictions()` and `spread_predictions()`. Use both `gather_predictions()` and `spread_predictions()` to repeat the analysis with the two models used in problem (3) above.  How do these three functions differ?
+
+
+### (5) 23.3.3 Exercise 3
+
+What does `geom_ref_line()` do?  What package does it come from?  Why is displaying a reference line in plots showing residuals useful and important?
+
+
+### (6) 23.3.3 Exercise 4
+
+Why might you want to look at a frequency polygon of absolute residuals? What are the pros and cons compared to looking at the raw residuals?
+
+
+***
+## 23.4.5 Exercises
+
+
+
+### (7) 23.4.5 Exercise 4
+
+For `sim4`, which of `mod1` and `mod2` is better?  The book author believes that `mod2` does a slightly better job at removing patterns, but claims the effects are subtle.  Examine the $R^2$ values for the two models, and develop a plot that attempts to support this claim.  In the end, how well does your plot support the claim?  How likely is it that the claim is true?
+
+
+
+
+
+
+
