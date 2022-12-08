@@ -1,0 +1,73 @@
+%% ECE 8473 Digital Image Processing: Bonus Project
+% By Rebecca Garcia
+% Dated: November 30th, 2022
+clc; clear all; close all
+%% Loading File
+pic0 = imread('cat.jpg'); % Read image
+picgrey = rgb2gray(pic0); % Coverting to grayscale
+pic = double(picgrey);    % Converting from uint8 to double for processing
+%% Computing Sigma B
+P = imhist(picgrey);
+mT = 0;
+Pt = sum(P);
+for i = 1:length(P)
+    mT = mT+(i*P(i,1))/Pt;
+end
+for a = 2:length(P)
+    k1 = a;
+    for b = a+1:length(P)
+        k2 = b;
+        m1 = 0;
+        P1 = sum(P(1:k1-1));
+        for i = 1:k1-1
+           m1 = m1+(i*P(i,1))/P1;     
+        end
+        m2 = 0;    
+        P2 = sum(P(k1:k2-1));    
+        for j = k1:k2-1
+            m2 = m2+(j*P(j,1))/P2;
+        end
+        m3 = 0;
+        P3 = sum(P(k2:end));
+        for k = k2:length(P)
+            m3 = m3+(k*P(k,1))/P3;
+        end
+        sigma_B(a,b) = P1*(m1-mT)^2 + P2*(m2-mT)^2 + P3*(m3-mT)^2;
+        clearvars P1 P2 P3 m1 m2 m3  
+    end
+end
+% Maximum sigma_B and corresponding k
+[SB, K] = max((sigma_B));  
+[SB1, K1] = max(max(sigma_B));
+%% Sigma B Plot
+figure(1)
+hold on
+surf(sigma_B, 'EdgeColor', 'none')
+p = plot3(K1,K(K1),SB1,'*r');
+grid on
+title('sigma_B of k')
+xlabel('k2'); ylabel('k1'); zlabel('sigma_B')
+xlim([0 256]); ylim([0 256])
+%text(K,SB,'Maximum sigma_B','VerticalAlignment','top','HorizontalAlignment','left')
+legend([p],'Max Value')
+%% Segmentation
+pic(pic >= K1) = 255;
+pic(pic < K(K1)) = 0;
+pic(K(K1) <= pic & pic < K1) = 100;
+figure(2)
+imshow(uint8(pic),[])
+%% Histogram w/ Threshold
+figure(3)
+hold on
+plot(P)
+xline1 = [K1 K1];
+yline = [0 max(P)];
+plot(xline1,yline)
+xline2 = [K(K1) K(K1)];
+plot(xline2,yline)
+text(K(K1),12000,'Threshold K1','VerticalAlignment','top','HorizontalAlignment','left')
+text(K1,12000,'Threshold K2','VerticalAlignment','top','HorizontalAlignment','left')
+title('Image Histogram')
+xlabel('Intensity Value')
+xlim([0 256])
+ylabel('Count')
