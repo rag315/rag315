@@ -1,0 +1,3 @@
+Programming Assignment 2 Involved a client sending a file within a series of packets to a server. The packets would traverse through an emulator that would
+randomly drop packets. The file packets had to be sent in order without duplication. The server would then output this file. Log files of the sent packets'
+sequence numbers and acknowledgement numbers are also outputted.
