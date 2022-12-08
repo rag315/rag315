@@ -1,0 +1,2 @@
+This assignment had a client send a file through a series of packets to a server. The server had to send acknowledgements (ACKs) for every packet received.
+The packets had to be received in order for the file to be correct and readable.
