@@ -6,4 +6,5 @@ Matlab Script to rotate Radars to Origin
 - a Raspet Project
 
 Matlab Script Sun Positioning Algorithm
-- A matlab script that tells the approximate position of the sun based on the given date and time.
+- A matlab function that tells the approximate position of the sun based on the given date and time.
+- Algorithm was converted from C++ to Matlab by Rebecca G. The algorithm was sourced from http://www.psa.es/sdg/sunpos.htm
