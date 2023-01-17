@@ -9,11 +9,6 @@ Matlab Script to rotate Radars to Origin
 - Matlab Script to rotate the Left and Right Radars of a 3-Radar Array to the Middle Radar (Origin). Cannot include `radarOrientation.mat` due to proprietary information.
 - a Raspet Project
 
-MIT LL Terminal Encounter Model Data Analysis 
-- The LLTEM was developed to generate statistically representative encounters between unmanned aircraft and manned aircraft in terminal airspace. The data set consists of 1 Million encounters between two aircraft. This data set can be found at https://www.ll.mit.edu/r-d/datasets/unmanned-aircraft-terminal-area-encounters  .
-
-- For a final class project, this RMD File analyzes the LLTEM Data set.
-
 UFOs 2
 - A personal project intended to familiarize myself with python packages matplotlib, pandas, and geopandas. 'main.py' analyzes a 2016 dataset from the National UFO Reporting Center of US/Canada. This dataset can be found at https://data.world/aarranzlopez/ufo-sights-2016-us-and-canada . 
 <!---
