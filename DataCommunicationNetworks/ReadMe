@@ -1,0 +1,5 @@
+Programming Assignments as related to coursework in Data Communication Networks.
+Programming Assignment 1's goal was to send a file between a client and a host. The host would send an acknowledgement (ACK) once the file was received from the client.
+Programming Assignment 2's goal was the same as Programming Assignment 1 only with the addition of an emulator that would randomly drop file packets during transit. The host would have to communicate to the client that a packet was dropped and to resend the packet. The host would also have to be aware of duplicate packets and drop the extra packets as neccessary.
+In both programming assignments, the file had to be completely transmitted and outputted to file in the correct order.
+Programming Assignment 1 received a grade of 92, Programming Assignment 2 received a grade of 98.
