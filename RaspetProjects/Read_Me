@@ -1,1 +1,9 @@
 Repository for Raspet Projects that can be shared publicly.
+
+
+Matlab Script to rotate Radars to Origin
+- Matlab Script to rotate the Left and Right Radars of a 3-Radar Array to the Middle Radar (Origin). Cannot include `radarOrientation.mat` due to proprietary information.
+- a Raspet Project
+
+Matlab Script Sun Positioning Algorithm
+- A matlab script that tells the approximate position of the sun based on the given date and time.
