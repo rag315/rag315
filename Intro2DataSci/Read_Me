@@ -1,0 +1,7 @@
+MIT LL Terminal Encounter Model Data Analysis 
+- The LLTEM was developed to generate statistically representative encounters between unmanned aircraft and manned aircraft in terminal airspace. The data set consists of 1 Million encounters between two aircraft. This data set can be found at https://www.ll.mit.edu/r-d/datasets/unmanned-aircraft-terminal-area-encounters  .
+
+- For a final class project, this RMD File analyzes the LLTEM Data set.
+
+Other Files
+- The other files in this repository are reflective of class work that taught methods of Data Analysis using the R Programming Language
